@@ -22,11 +22,11 @@
 
 ```java
 @TGest public void testAdd() {
-	assertEquals(3, add(1, 2));
-	assertEquals(2, add(0, 2));
-	assertEquals(0, add(0, 0));
-	assertEquals(0, add(-1, 1));
-	assertEquals(Integer.MIN_VALUE, add(1, Integer,MAX_VALUE));
+  assertEquals(3, add(1, 2));
+  assertEquals(2, add(0, 2));
+  assertEquals(0, add(0, 0));
+  assertEquals(0, add(-1, 1));
+  assertEquals(Integer.MIN_VALUE, add(1, Integer,MAX_VALUE));
 }
 ```
 
@@ -37,17 +37,17 @@
 
 ```go
 tests := []struct {
-	a, b, c int32
+  a, b, c int32
 } {
-	{1,2,3},
-	{0,2,2},
-	{0,0,0},
-	{-1,1,0},
-	{math.MaxInt32,1,math.MinInt32},
+ {1,2,3},
+ {0,2,2},
+ {0,0,0},
+ {-1,1,0},
+ {math.MaxInt32,1,math.MinInt32},
 }
 
 for _, test := range tests {
-	if actual := add(test.a, test.b); actual != test.c {}
+ if actual := add(test.a, test.b); actual != test.c {}
 }
 ```
 
@@ -55,6 +55,52 @@ for _, test := range tests {
 - 明确的出错信息
 - 可以部分失败
 - go语言的语法使得我们更容易实践表格驱动测试
+
+## 8.错误处理和资源管理
+
+- go是用defer调用来管理资源的
+- 确保调用在函数结束时发生
+  - 就是说defer后面的代码一定会再函数结束前才会发生
+- 何时使用defer调用
+  - open/close
+  - lock/unlock
+  - PrintHeader/PrintFooter
+
+```go
+func writeFile(filename string) {
+ file, err := os.Create(filename)
+ if err != nil {
+  panic(err)
+ }
+ defer file.Close()
+
+ writer := bufio.NewWriter(file)
+ defer writer.Flush()
+ // 注意：defer是先进后出的栈
+
+ for i := 0; i < 20; i++ {
+  fmt.Fprintln(writer, i)
+ }
+}
+```
+
+> 这小段代码把`defer`的使用场景和go的设计精妙都体现出来了
+
+## 错误处理
+
+> 知道到底是什么样的错误，进异步处理它。
+
+```go
+file, err := os.Open(filename)
+ if err != nil {
+  if pathError, ok := err.(*os.PathError); ok {
+   fmt.Println("@Error", pathError.Err)
+  } else {
+   fmt.Println("@Unknown error", err)
+  }
+  return
+ }
+```
 
 ## Goroutine
 
@@ -78,13 +124,13 @@ for _, test := range tests {
 
 ```go
 func main() {
-	for i := 0; i < 10; i++ {
-		func(i int) {
-			for {
-				fmt.Printf("Hello goroutine %d\n", i)
-			}
-		}(i)
-	}
+  for i := 0; i < 10; i++ {
+    func(i int) {
+      for {
+        fmt.Printf("Hello goroutine %d\n", i)
+      }
+    }(i)
+  }
 }
 ```
 
@@ -99,13 +145,13 @@ func main() {
 
 ```go
 func main() {
-	for i := 0; i < 10; i++ {
-		go func(i int) {
-			for {
-				fmt.Printf("Hello goroutine %d\n", i)
-			}
-		}(i)
-	}
+ for i := 0; i < 10; i++ {
+  go func(i int) {
+   for {
+    fmt.Printf("Hello goroutine %d\n", i)
+   }
+  }(i)
+ }
 }
 ```
 
@@ -117,14 +163,14 @@ func main() {
 
 ```go
 func main() {
-	for i := 0; i < 10; i++ {
-		go func(i int) {
-			for {
-				fmt.Printf("Hello goroutine %d\n", i)
-			}
-		}(i)
-	}
-	time.Sleep(time.Millisecond)
+ for i := 0; i < 10; i++ {
+  go func(i int) {
+   for {
+    fmt.Printf("Hello goroutine %d\n", i)
+   }
+  }(i)
+ }
+ time.Sleep(time.Millisecond)
 }
 ```
 
@@ -135,14 +181,14 @@ func main() {
 
 ```go
 func main() {
-	for i := 0; i < 1000; i++ {
-		go func(i int) {
-			for {
-				fmt.Printf("Hello goroutine %d\n", i)
-			}
-		}(i)
-	}
-	time.Sleep(time.Minute)
+ for i := 0; i < 1000; i++ {
+  go func(i int) {
+   for {
+    fmt.Printf("Hello goroutine %d\n", i)
+   }
+  }(i)
+ }
+ time.Sleep(time.Minute)
 }
 ```
 
@@ -159,16 +205,16 @@ func main() {
 
 ```go
 func main() {
-	var a [10]int
-	for i := 0; i < 10; i++ {
-		go func(i int) {
-			for {
-				a[i]++
-			}
-		}(i)
-	}
-	time.Sleep(time.Millisecond)
-	fmt.Println(a)
+ var a [10]int
+ for i := 0; i < 10; i++ {
+  go func(i int) {
+   for {
+    a[i]++
+   }
+  }(i)
+ }
+ time.Sleep(time.Millisecond)
+ fmt.Println(a)
 }
 ```
 
