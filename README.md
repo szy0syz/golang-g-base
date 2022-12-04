@@ -354,6 +354,8 @@ time.Sleep(time.Millisecond * 1000)
 
 ## Channel
 
+<img width="507" alt="image" src="https://user-images.githubusercontent.com/10555820/205502561-afd9a355-c824-47c0-9f52-05649dc59f94.png">
+
 > Channel 是 Goroutine 之间通信的桥梁，它和函数一样是一等公民。
 
 ### 使用 Channel 进行树的遍历
