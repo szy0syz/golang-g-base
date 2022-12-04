@@ -86,7 +86,7 @@ func writeFile(filename string) {
 
 > 这小段代码把`defer`的使用场景和go的设计精妙都体现出来了
 
-## 错误处理
+### 错误处理
 
 > 知道到底是什么样的错误，进异步处理它。
 
@@ -101,6 +101,64 @@ file, err := os.Open(filename)
   return
  }
 ```
+
+### list-web-server
+
+```go
+func main() {
+ http.HandleFunc("/list/", func(w http.ResponseWriter, r *http.Request) {
+  path := r.URL.Path[len("/list/"):] // /list/readme.txt
+
+  file, err := os.Open(path)
+  if err != nil {
+   http.Error(w, err.Error(), http.StatusInternalServerError)
+   return
+  }
+  defer file.Close()
+
+  all, err := ioutil.ReadAll(file)
+  if err != nil {
+   panic(err)
+  }
+
+  w.Write(all)
+ })
+
+ err := http.ListenAndServe(":8888", nil)
+ if err != nil {
+  panic(err)
+ }
+}
+```
+
+- 就目前而言Error处理是业务逻辑，应该和运行流程无关，提出来
+
+### 统一错误处理
+
+```go
+type appHandler func(w http.ResponseWriter, r *http.Request) error
+
+func errWrapper(handler appHandler) func(w http.ResponseWriter, r *http.Request) {
+ return func(w http.ResponseWriter, r *http.Request) {
+  err := handler(w, r)
+  if err != nil {
+   log.Println("Error handling request:", err.Error())
+   code := http.StatusOK
+   switch {
+   case os.IsNotExist(err): // 文件不存在的错误
+    code = http.StatusNotFound
+   case os.IsPermission(err): // 没权限读
+    code = http.StatusForbidden
+   default:
+    code = http.StatusInternalServerError
+   }
+   http.Error(w, http.StatusText(code), code)
+  }
+ }
+}
+```
+
+- 函数式编程真不错
 
 ## Goroutine
 
