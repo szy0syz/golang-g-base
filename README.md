@@ -160,6 +160,36 @@ func errWrapper(handler appHandler) func(w http.ResponseWriter, r *http.Request)
 
 - 函数式编程真不错
 
+### panic
+
+- 停止当前函数执行
+- 一直向上返回，执行每一次的defer
+- 如果没遇到recover，程序就退出
+
+### recover
+
+- 仅在defer调用中使用
+- 获取panic的值
+- 如果无法处理，可重新panic
+
+```go
+func tryRecover() {
+ defer func() {
+  r := recover()
+  if err, ok := r.(error); ok {
+   fmt.Println("Error occurred:", err)
+  } else {
+   panic(fmt.Sprintf("I don't know what to do: %v", r))
+  }
+ }()
+ // panic(errors.New("it is a big error"))
+ // zero := 0
+ // a := 1 / zero
+ // println(a)
+ panic("123")
+}
+```
+
 ## Goroutine
 
 > 并发编程：Goroutine，协程的概念，以及背后的 Go 语言调度器。
