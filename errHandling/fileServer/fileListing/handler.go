@@ -4,10 +4,27 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 )
 
+var prefix = "/list/"
+
+type userError string
+
+func (e userError) Error() string {
+	return e.Message()
+}
+
+func (e userError) Message() string {
+	return string(e)
+}
+
 func Handler(w http.ResponseWriter, r *http.Request) error {
-	path := r.URL.Path[len("/list/"):] // /list/readme.txt
+	if strings.Index(r.URL.Path, prefix) != 0 {
+		return userError("path must start with " + prefix)
+	}
+
+	path := r.URL.Path[len(prefix):] // /list/readme.txt
 
 	file, err := os.Open(path)
 	if err != nil {

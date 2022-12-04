@@ -190,6 +190,18 @@ func tryRecover() {
 }
 ```
 
+### error VS panic
+
+- 意料之中的: 使用error —— 如文件打不开
+  - 你能想到的错误都是error，不能是panic，用panic太崩溃
+- 意料之外的: 使用panic —— 如数组越界
+
+### 综合实例
+
+- 目前web.go代码中虽然有http的自带recover，但我们想加一些自定义Error，然后自己保护一下
+- 那我们就在errWrapper里先做自己的保护
+- Go语言牛的地方在于同一个接口，在两个地方使用，可以不引用，结构一样即可
+
 ## Goroutine
 
 > 并发编程：Goroutine，协程的概念，以及背后的 Go 语言调度器。
