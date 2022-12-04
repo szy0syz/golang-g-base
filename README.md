@@ -358,4 +358,34 @@ time.Sleep(time.Millisecond * 1000)
 
 > Channel 是 Goroutine 之间通信的桥梁，它和函数一样是一等公民。
 
+```go
+func chanDemo() {
+ c := make(chan int)
+ c <- 1 // 我们发一个数据，没人收，就会死锁，deadlock
+ c <- 2
+
+ n := <-c
+ fmt.Println(n)
+}
+// 🚫 fatal error: all goroutines are asleep - deadlock!
+// chan 必须和 chan 相连
+```
+
+```go
+func chanDemo() {
+ c := make(chan int)
+ go func() {
+  for {
+   n := <-c
+   fmt.Println(n)
+  }
+ }()
+ c <- 1
+ c <- 2
+}
+// ok 可以收到了
+// 1
+// 2
+```
+
 ### 使用 Channel 进行树的遍历
