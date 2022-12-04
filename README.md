@@ -388,4 +388,101 @@ func chanDemo() {
 // 2
 ```
 
+```go
+func worker(id int, c chan int) {
+ for {
+  n := <-c
+  fmt.Printf("Worker %d received: %d\n", id, n)
+ }
+}
+
+func chanDemo() {
+ c := make(chan int)
+ go worker(0, c)
+ c <- 1
+ c <- 2
+}
+
+
+// 进一步优化，把函数提出去
+// 协程不一定是否异步函数，这一点简直绝绝子
+```
+
+```go
+func chanDemo() {
+ var channels [10]chan int
+
+ // 这里只是创建chan
+ for i := 0; i < 10; i++ {
+  channels[i] = make(chan int)
+  go worker(0, channels[i])
+ }
+
+ for i := 0; i < 10; i++ {
+  channels[i] <- 'a' + i
+ }
+
+ for i := 0; i < 10; i++ {
+  channels[i] <- 'A' + i
+ }
+
+ time.Sleep(time.Millisecond)
+}
+```
+
+```bash
+$ go run .
+Worker 0 received: i
+Worker 0 received: f
+Worker 0 received: g
+Worker 0 received: a
+Worker 0 received: A
+Worker 0 received: b
+Worker 0 received: c
+Worker 0 received: h
+Worker 0 received: j
+Worker 0 received: C
+Worker 0 received: d
+Worker 0 received: D
+Worker 0 received: B
+```
+
+> 其实worker可以自己返回一个chan
+
+```go
+func createWorker(id int) chan<- int {
+ c := make(chan int)
+ go func() {
+  for {
+   fmt.Printf("Worker %d received: %c\n", id, <-c)
+  }
+ }()
+ return c
+}
+```
+
+- 限定我们的chan只能发数据，worker里就只能接数据，非常安全
+- 如果我们在外边想收数据，那就编译错误了
+- 我们可以限制chan的数据流向，到底是只能收，还是只能发，还是双向的
+
+> 我们应该告诉外面调用createWorker的人怎么用我们的chan
+
+### bufferedChannel
+
+```go
+func bufferedChannel() {
+ c := make(chan int, 3)
+
+ c <- 1
+ c <- 2
+ c <- 3
+}
+
+// 如果这样，缓冲区能接住，就不会deadlock
+```
+
+- Channel是一等公民
+- Buffered Channel
+- Channel Close
+
 ### 使用 Channel 进行树的遍历
