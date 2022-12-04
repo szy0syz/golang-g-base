@@ -484,5 +484,13 @@ func bufferedChannel() {
 - Channel是一等公民
 - Buffered Channel
 - Channel Close
+- Channel为什么要被设计成这样的？
+  - 理论基础： Communication Sequential Process (CSP) 👍
+  - Go语言的并发就是基础CSP模型来实现的
+
+> ⭐️⭐️⭐️ channel实际应用中的注意点：(和以前的编程语言有非常大的区别！)
+
+- Don't communicate by sharing memory; share memory by communicating.
+- 不要通过共享内存来通信；通过通信来共享内存。
 
 ### 使用 Channel 进行树的遍历
