@@ -32,14 +32,18 @@ func chanDemo() {
 		workers[i] = createWorker(i)
 	}
 
-	for i := 0; i < 10; i++ {
-		workers[i].in <- 'a' + i
-		<-workers[i].done
+	for i, worker := range workers {
+		worker.in <- 'a' + i
 	}
 
-	for i := 0; i < 10; i++ {
-		workers[i].in <- 'A' + i
-		<-workers[i].done
+	for i, worker := range workers {
+		worker.in <- 'A' + i
+	}
+
+	// wait for all of them
+	for _, worker := range workers {
+		<-worker.done
+		<-worker.done
 	}
 }
 
