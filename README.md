@@ -657,3 +657,7 @@ func main() {
 > 传统的同步机制，还是尽量使用Channel来通信
 
 ### 使用 Channel 进行树的遍历
+
+## 迷宫的广度优先搜索
+
+<img width="912" alt="image" src="https://user-images.githubusercontent.com/10555820/205683008-1b05bc2d-2ec4-4a15-a8de-d3b2435bb7aa.png">
