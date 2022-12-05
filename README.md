@@ -493,4 +493,61 @@ func bufferedChannel() {
 - Don't communicate by sharing memory; share memory by communicating.
 - 不要通过共享内存来通信；通过通信来共享内存。
 
+```go
+func doWorker(id int, c chan int, done chan bool) {
+ for n := range c {
+  fmt.Printf("Worker %d received: %c\n", id, n)
+  done <- true
+ }
+}
+
+type worker struct {
+ in   chan int
+ done chan bool
+}
+
+func createWorker(id int) worker {
+ w := worker{
+  in:   make(chan int),
+  done: make(chan bool),
+ }
+ go doWorker(id, w.in, w.done)
+ return w
+}
+
+func chanDemo() {
+ var workers [10]worker
+
+ for i := 0; i < 10; i++ {
+  workers[i] = createWorker(i)
+ }
+
+ for i := 0; i < 10; i++ {
+  workers[i].in <- 'a' + i
+  <-workers[i].done
+ }
+
+ for i := 0; i < 10; i++ {
+  workers[i].in <- 'A' + i
+  <-workers[i].done
+ }
+}
+```
+
+这么一改，我靠，全变顺序执行了，一点也不优雅
+
+```bash
+$ go run .                                                                  
+Worker 0 received: a
+Worker 1 received: b
+Worker 2 received: c
+Worker 3 received: d
+Worker 4 received: e
+Worker 5 received: f
+Worker 6 received: g
+Worker 7 received: h
+Worker 8 received: i
+Worker 9 received: j
+```
+
 ### 使用 Channel 进行树的遍历
