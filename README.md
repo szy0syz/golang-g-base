@@ -588,4 +588,72 @@ func main() {
 }
 ```
 
+### 完整的select调度
+
+```go
+
+```
+
+### mutex
+
+> 互斥
+
+- 先来创造一个 `data race`
+
+```go
+type atomicInt int
+
+func (a *atomicInt) increment() {
+  // 这里的写操作
+  *a++
+}
+func (a *atomicInt) get() int {
+ return int(*a)
+}
+func main() {
+ var a atomicInt
+ a.increment()
+ go func() {
+  a.increment()
+ }()
+ time.Sleep(time.Millisecond)
+ // 和这里的读操作 冲突了
+ fmt.Println(a.get())
+}
+```
+
+```go
+
+type atomicInt struct {
+ value int
+ lock  sync.Mutex
+}
+
+func (a *atomicInt) increment() {
+ func() {
+  a.lock.Lock()
+  defer a.lock.Unlock()
+  a.value++
+ }()
+}
+
+func (a *atomicInt) get() int {
+ a.lock.Lock()
+ defer a.lock.Unlock()
+ return a.value
+}
+
+func main() {
+ var a atomicInt
+ a.increment()
+ go func() {
+  a.increment()
+ }()
+ time.Sleep(time.Millisecond)
+ fmt.Println(a.get())
+}
+```
+
+> 传统的同步机制，还是尽量使用Channel来通信
+
 ### 使用 Channel 进行树的遍历
