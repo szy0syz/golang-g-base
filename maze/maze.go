@@ -9,6 +9,27 @@ type point struct {
 	i, j int
 }
 
+func (p point) add(r point) point {
+	// 我们不要原地加，还是new一个出去
+	// 说的事传不传指针问题
+	return point{p.i + r.i, p.j + r.j}
+}
+
+// 在point上继续抽象struct 抽抽抽
+func (p point) at(grid [][]int) (int, bool) {
+	// 第i行是否越界
+	if p.i < 0 || p.j >= len(grid) {
+		return 0, false
+	}
+
+	// 第j列是否又越界了
+	if p.j < 0 || p.j >= len(grid[p.i]) {
+		return 0, false
+	}
+
+	return grid[p.i][p.j], true
+}
+
 var dirs = [4]point{
 	// 上			 右👉🏻			 下		  👈🏻左
 	{-1, 0}, {0, -1}, {1, 0}, {0, 1}}
@@ -32,6 +53,31 @@ func walk(maze [][]int, start, end point) {
 		cur := Q[0]
 		// 提取队首后面的元素
 		Q = Q[1:]
+
+		for _, dir := range dirs {
+			// go语言没有操作符重载或太麻烦，不如直接写个方法
+			// next := cur + dir
+
+			// 当前点加方向就是我们下一步要探索的点
+			next := cur.add(dir)
+
+			// 我们得确保 maze at next is 0 可走
+			// and steps at next is 0
+			// and next != start
+			val, ok := next.at(maze)
+			if !ok || val == 1 {
+				continue
+			}
+
+			val, ok = next.at(steps)
+			if !ok || val != 0 {
+				continue
+			}
+
+			if next == start {
+				continue
+			}
+		}
 	}
 }
 
