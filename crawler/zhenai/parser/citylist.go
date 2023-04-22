@@ -20,5 +20,5 @@ func ParseCityList(contents []byte) engine.ParseResult {
 		})
 	}
 
-	return resulta
+	return result
 }
